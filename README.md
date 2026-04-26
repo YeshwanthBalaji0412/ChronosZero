@@ -96,17 +96,3 @@ triggers. Cold blue stealth phase. Frantic red escape phase. One transition mome
 - **GitHub:** https://github.com/YeshwanthBalaji0412/ChronosZero.git
 - **Gameplay Video:** https://youtu.be/U46wT32sx34?si=7V0TTyG9CaqkSVwA
 
----
-
-## Course
-**CSYE7270 — Building Virtual Environments**
-Northeastern University
-Professor Nik Bear Brown
-
-**Student:** Yeshwanth Balaji
-**NUID:** 002378751
-
----
-
-## License
-MIT License — Copyright 2026 Yeshwanth Balaji
