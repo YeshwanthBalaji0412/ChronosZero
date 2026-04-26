@@ -1,0 +1,267 @@
+Game Name: Chronos Zero
+Course: CSYE7270 - Building Virtual Environments
+Assignment: Final Portfolio Project
+Name: Yeshwanth Balaji
+NUID: 002378751
+
+--------------------------------------------------
+LICENSE INFORMATION
+--------------------------------------------------
+
+Copyright (c) 2026 Yeshwanth Balaji
+
+This project is licensed under the MIT License.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated project files, to deal in the Software without
+restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+All original Blueprints, materials, level designs, UI layouts, gameplay
+systems, and documentation created for this project belong to the student
+listed above.
+
+--------------------------------------------------
+PROJECT OVERVIEW
+--------------------------------------------------
+
+Chronos Zero is a single-mission stealth-to-escape game built in Unreal
+Engine 5. The player infiltrates a sci-fi facility, navigates six security
+zones, collects a keycard to unlock zone-progression doors, holds E to
+interact with the Data Core objective, and then escapes to the extraction
+zone within a 15-second countdown before the alarm expires.
+
+The core design concept is emotional and mechanical transformation of the
+same physical space: calm and controlled during infiltration, urgent and
+stressful during escape. The alarm trigger - which floods the environment
+with red lighting, fires a siren, starts the countdown, and closes doors -
+is the centrepiece mechanic of the entire game.
+
+The project demonstrates a complete gameplay loop with custom shaders and
+materials, a full animation Blueprint with five locomotion states, a
+complete UX/UI system, spatial audio, zone-based level progression, and
+AI patrol drone enemies with vision cone detection.
+
+--------------------------------------------------
+ORIGINAL WORK IMPLEMENTED
+--------------------------------------------------
+
+Shaders and Materials:
+- M_DataCore - Custom emissive material for the Data Core objective with
+  pulsing glow effect driven by a dynamic material parameter
+- M_DataCore_Outer - Secondary shell material for the Data Core with
+  translucency and animated emission
+- M_VisionCone - Custom translucent material for enemy patrol drone
+  detection cone (green at rest)
+- M_VisionCone_Alert - Alert-state variant of the vision cone material
+  (red tint with increased emissive intensity on detection)
+- MI_DefaultColorway, MI_GlowNT, MI_PrototypeGrid_* - Material instances
+  used for level blockout and environment prototyping
+
+Animation:
+- ABP_Astra - Custom Animation Blueprint for the player character with a
+  full locomotion state machine covering five states: Idle (Breathing_Idle),
+  Walk, Run, Crouch Idle, and Crouch Walk. Transitions are driven by
+  character velocity and the bIsCrouching variable set in BP_ThirdPersonCharacter.
+- Breathing_Idle - Custom idle animation with subtle breathing motion
+- Crouch_Idle - Crouched idle pose animation
+- Crouched_Walking - Crouched movement animation cycle
+- Running - Full run cycle for the player character
+- Walking - Standard walk cycle for the player character
+
+UX/UI:
+- WBP_MainMenu - Main menu screen with game title, Play button, and
+  How To Play button; BGM plays on construction
+- WBP_HUD - In-game heads-up display showing stamina bar, countdown timer
+  (hidden until alarm), interaction progress prompt, zone prompt text,
+  and alarm flash overlay
+- WBP_Victory - Win screen displayed upon reaching the extraction zone
+- WBP_GameOver - Game Over screen displayed when detected or timer expires
+- WBP_HowToPlay - Tutorial overlay showing controls (WASD, Shift, C, E hold,
+  E press), objectives, zone map, escape timer duration, and win/lose conditions
+- Orbitron-Bold font - Sci-fi typeface used consistently across all UI screens
+
+Audio:
+- Spatial audio integration using UE5 Attenuation settings on in-world
+  sound actors
+- CyberwavePack tracks - Background music and alarm siren cues
+  (S_Scarlet_Virus_Dplr used as alarm trigger sound on alarm activation)
+- Isolation_Cue - Atmospheric BGM loop playing on the main menu
+- Footstep audio - Three-tier system built in BP_ThirdPersonCharacter
+  Event Tick: walk footsteps (Footstep_Metal_Boots_Walk_1_Cue, Vol 0.8),
+  sprint footsteps (Footstep_Metal_Boots_Run_1_Cue, Vol 1.2), and crouch
+  footsteps (Footstep_Metal_Boots_Jog_1_Cue, Vol 0.3). Gated to game
+  level only via GetCurrentLevelName check to prevent menu audio bleed.
+
+Gameplay Systems:
+- BP_GameMode_CZ - Custom Game Mode managing HUD creation, alarm state,
+  countdown timer (15 seconds), light colour transitions (blue to red),
+  AlarmFlicker Timeline, DoorSlam Timeline, camera shake, and win/lose logic
+- BP_GameMode_Menu - Lightweight Game Mode for the main menu level with
+  no default pawn to prevent character spawning
+- BP_ThirdPersonCharacter - Extended Third Person character with: stamina
+  system (drain, regen, auto-cancel sprint at zero), sprint speed toggle
+  (400 walk / 700 sprint), crouch with DetectionModifier (1.0 standing /
+  0.3 crouching), bIsInteracting variable, bHasDataCore variable, and
+  three-tier footstep audio system
+- BP_DataCore - Interactable objective actor with: proximity detection
+  (300 unit range), hold-to-interact progress accumulation, interact prompt
+  visibility toggle, Data Core spin animation, Niagara spark VFX on
+  collection, alarm trigger on collection, and self-hide on pickup
+- BP_PatrolDrone - AI patrol enemy built as a Pawn with FloatingPawnMovement,
+  AI MoveTo via OnSuccess index cycling with modulo wrap, configurable
+  PatrolPoints array, VisionRange, VisionAngle, and bIsAlerted state
+- BP_PatrolDrone_2 - Second patrol drone instance with independent route
+  placed in a later zone for increased difficulty
+- BP_Keycard - Collectible pickup that unlocks zone-progression doors
+- BP_KeycardRevealTrigger - Proximity trigger revealing keycard location
+- BP_Door_Z1 through BP_Door_Z5Z6 - Zone-gating doors that open
+  sequentially as the player collects keycards and progresses
+- BP_ExtractionZone - Endgame trigger zone; fires Victory event on overlap
+- BP_AlarmCameraShake - Camera shake Blueprint triggered at alarm activation
+- Nav Mesh Bounds Volume - Navigation mesh covering patrol zones for AI
+  pathfinding
+
+Level Design:
+- L_ChronosZero_Main - Full gameplay level featuring six navigable zones
+  (Entry, Patrol Zone, Mid Corridor, Core Vault, Escape Route, Exit) built
+  from geometry cubes with correct doorway connections, a L-shaped escape
+  route, the Data Core pedestal in Zone 4, Zone 4 locked exit, extraction
+  point in Zone 6, and six Point Lights with colour-changing alarm system
+- L_MainMenu - Dedicated menu level with UI-only Game Mode
+
+--------------------------------------------------
+REFERENCED / LEARNING RESOURCES
+--------------------------------------------------
+
+The following resources were used for learning. No content was directly
+copied from any tutorial. All Blueprint logic, material graphs, level
+layouts, UI designs, and gameplay systems were built independently.
+
+Unreal Engine 5 Documentation:
+https://docs.unrealengine.com/5.0/en-US/
+Used for: Animation Blueprint setup, Widget Blueprint layout, Niagara
+particle integration, UE5 Enhanced Input system, AI navigation and
+pathfinding (NavMesh, AI MoveTo), Gameplay Framework (GameMode,
+PlayerController), Timeline nodes, UMG visibility and binding.
+
+Adobe Mixamo:
+https://www.mixamo.com/
+Used to source: Jennifer character model (T-Pose FBX) renamed and
+rigged as Astra, and animations retargeted to the Astra skeleton.
+
+--------------------------------------------------
+AI TOOLS DISCLOSURE
+--------------------------------------------------
+
+The following AI tools were used during development:
+
+- Claude (Anthropic) - Used for assignment planning, Blueprint logic
+  guidance step by step (stamina system, patrol AI, alarm transition,
+  HUD binding, footstep system, zone prompt trigger), material design
+  advice, UI layout suggestions, audio integration walkthroughs,
+  Blueprint debugging, codebase audit, documentation writing assistance,
+  and License.txt generation. All AI-assisted suggestions were reviewed,
+  understood, and implemented manually in Unreal Engine 5.
+
+All AI tools were used as learning aids and productivity tools. All
+Blueprints, materials, level design, UI construction, and gameplay
+integration were built manually within Unreal Engine 5.
+
+--------------------------------------------------
+THIRD-PARTY ASSETS
+--------------------------------------------------
+
+The following third-party assets were used under their respective licenses.
+No assets were used that restrict educational use.
+
+Character Model and Animations:
+- "Jennifer" character mesh - Source: Adobe Mixamo (mixamo.com)
+  Usage: Base character mesh renamed and rigged as Astra, the player
+  character. Retargeted to work with the UE5 skeleton.
+- Mixamo Animation Library - Source: Adobe Mixamo
+  Usage: Crouch Walk and supplementary animations retargeted to Astra's
+  skeleton for in-game locomotion.
+
+Audio:
+- CyberwavePack - Source: Unreal Engine Marketplace
+  Usage: Alarm siren sound (S_Scarlet_Virus_Dplr) and atmospheric audio
+  cues throughout the main level.
+- Essential Footsteps Sound Kit - Source: Unreal Engine Marketplace
+  Usage: Footstep audio (Metal Boots Walk, Run, Jog variants) triggered
+  via Event Tick velocity check in BP_ThirdPersonCharacter.
+- Footsteps Volume 02 (The Sound Guild) - Source: Unreal Engine Marketplace
+  Usage: Additional footstep variations for walk, run, and crouch states.
+
+Environment Art:
+- Sci-Fi Hallway Asset Pack - Source: Unreal Engine Marketplace
+  Usage: Modular walls, floors, ceilings, and props dressing the facility
+  interior.
+- Modular Sci-Fi Mechanic Base - Source: Unreal Engine Marketplace
+  Usage: Additional modular environment pieces for zone construction.
+- Sci-Fi Panels - Source: Unreal Engine Marketplace
+  Usage: Decorative surface panels and decal materials.
+
+Engine Templates / Engine Content:
+- Unreal Engine 5 Third Person Template - Source: Epic Games
+  Usage: Starting template for character movement, camera rig, and
+  Mannequin skeleton. All gameplay logic was replaced or extended with
+  custom Blueprints. Lyra Starter Game was NOT used.
+- Niagara Gallery Examples - Source: Epic Games (engine sample content)
+  Usage: NS_Spark_Burst Niagara system used for Data Core collection VFX.
+
+--------------------------------------------------
+VIDEO AND PROJECT LINKS
+--------------------------------------------------
+
+GitHub Repository:
+https://github.com/YeshwanthBalaji0412/ChronosZero.git
+
+Gameplay and Walkthrough Video:
+https://youtu.be/U46wT32sx34?si=7V0TTyG9CaqkSVwA
+
+--------------------------------------------------
+SOFTWARE AND ENGINE
+--------------------------------------------------
+
+- Unreal Engine 5 (Epic Games) - Primary game engine
+- Adobe Mixamo - Character model and animation source
+- macOS Screen Recorder - Gameplay capture
+- CapCut - Video editing for walkthrough
+- Claude (Anthropic) - Documentation and planning assistance
+
+--------------------------------------------------
+DECLARATION
+--------------------------------------------------
+
+I confirm that this submission represents my original academic work.
+All external tutorials, AI tools, third-party assets, and marketplace
+content used during development have been properly acknowledged above.
+
+The gameplay systems (zone-gated progression, stamina system, patrol drone
+AI with vision cone detection, keycard mechanics, hold-to-interact Data Core,
+alarm transition with blue-to-red lighting, 15-second countdown escape,
+extraction win condition), custom materials (Data Core emission, vision cone
+alert states), animation Blueprint (Astra five-state locomotion state
+machine), footstep audio system, and all UI screens (Main Menu, HUD,
+Victory, Game Over, How to Play) were designed and built from scratch by
+the student within Unreal Engine 5.
+
+Third-party environment, audio, and character assets were integrated and
+configured by the student to serve the project's design goals.
+
+This project was developed for educational purposes under the requirements
+of CSYE7270 - Building Virtual Environments.
